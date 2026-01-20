@@ -1,0 +1,67 @@
+name: Build Linux ARM64
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-arm64:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: arm64
+    
+    - name: Build in ARM64 container
+      uses: uraimo/run-on-arch-action@v2
+      id: build
+      with:
+        arch: aarch64
+        distro: ubuntu22.04
+        
+        # 将构建产物映射出来
+        dockerRunArgs: |
+          --volume "${PWD}/artifacts:/artifacts"
+        
+        # 安装依赖
+        install: |
+          apt-get update -q -y
+          apt-get install -q -y build-essential cmake
+          apt-get install -q -y libssl-dev
+        
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC=ON
+          make -j$(nproc) VERBOSE=1
+          
+          # 验证构建结果
+          echo "=== Build Info ==="
+          file unsegareborn
+          ls -la unsegareborn
+          ldd unsegareborn || echo "Static binary (no dynamic dependencies)"
+          
+          # 复制到 artifacts 目录
+          mkdir -p /artifacts
+          cp unsegareborn /artifacts/
+    
+    - name: Prepare artifact
+      run: |
+        mkdir -p output
+        cp artifacts/unsegareborn output/ || cp build/unsegareborn output/
+        chmod +x output/unsegareborn
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: unsegareborn-linux-arm64-static
+        path: output/unsegareborn
+        retention-days: 30
