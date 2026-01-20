@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 static const uint8_t NTFS_HEADER[16] = {
     0xeb, 0x52, 0x90, 0x4e, 0x54, 0x46, 0x53, 0x20,
