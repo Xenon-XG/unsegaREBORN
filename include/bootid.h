@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 static const uint8_t BOOTID_KEY[16] = {
     0x09, 0xCA, 0x5E, 0xFD, 0x30, 0xC9, 0xAA, 0xEF,
