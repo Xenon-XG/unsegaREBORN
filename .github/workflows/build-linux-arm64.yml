@@ -34,7 +34,7 @@ jobs:
         # 安装依赖
         install: |
           apt-get update -q -y
-          apt-get install -q -y build-essential cmake
+          apt-get install -q -y build-essential cmake file
           apt-get install -q -y libssl-dev
         
         run: |
